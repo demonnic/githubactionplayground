@@ -16,14 +16,16 @@ issue_regexp = Regexp.new(/https?:\/\/(?:www\.)?github\.com\/Mudlet\/Mudlet\/iss
 sourcefile_regexp = Regexp.new(/.*\.(cpp|c|h|lua)$/)
 sourcefiles = (git.modified_files + git.added_files).uniq.select { |file| file.match(sourcefile_regexp) }
 bad_todos = false
+added_todos = 0
 sourcefiles.each do |filename|
   additions = git.diff_for_file(filename).patch.lines.grep(/^\+/)
   additions.each do |line|
     next unless line.include?("TODO")
+    added_todos += 1
     unless line.match(issue_regexp)
       failure("TODO included in additions to file `#{filename}` without an issue link")
       bad_todos = true
     end
   end
 end
-message("TODO check successful, any added TODOs have a linked issue") unless bad_todos
+message("TODO check successful, #{added_todos} added TODO(s) have a linked issue") unless bad_todos || added_todos < 1
