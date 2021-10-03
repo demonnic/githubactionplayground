@@ -11,14 +11,19 @@ else
   message("PR title is proper, PR is of type `#{pr_type}`")
 end
 
-## Checks that any TODOs on changed lines have a link to a github issue
-issue_regexp = Regexp.new(/https?:\/\/(?:www\.)?github\.com\/Mudlet\/Mudlet\/issues\/(\d+)/)
+## Checks that any TODOs on added lines have a link to a github issue
+issue_regexp = Regexp.new(/https?:\/\/(?:www\.)?github\.com\/Mudlet\/Mudlet\/issues\/(\d+)/i)
 sourcefile_regexp = Regexp.new(/.*\.(cpp|c|h|lua)$/)
 sourcefiles = (git.modified_files + git.added_files).uniq.select { |file| file.match(sourcefile_regexp) }
+bad_todos = false
 sourcefiles.each do |filename|
   additions = git.diff_for_file(filename).patch.lines.grep(/^\+/)
   additions.each do |line|
     next unless line.include?("TODO")
-    failure("TODO included in additions to file `#{filename}` without an issue link") unless line.match(issue_regexp)
+    unless line.match(issue_regexp)
+      failure("TODO included in additions to file `#{filename}` without an issue link")
+      bad_todos = true
+    end
   end
 end
+message("TODO check successful, any added TODOs have a linked issue") unless bad_todos
