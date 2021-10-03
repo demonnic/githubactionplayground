@@ -28,4 +28,4 @@ sourcefiles.each do |filename|
     end
   end
 end
-message("TODO check successful, #{added_todos} added TODO(s) have a linked issue") unless bad_todos || added_todos < 1
+message("TODO check successful, #{added_todos} added TODO(s) include(s) a linked issue") unless bad_todos || added_todos < 1
