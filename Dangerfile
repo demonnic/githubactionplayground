@@ -1,31 +1,57 @@
 # Automates some of the checks for PRs
 
 ## Checks title formatting. This formatting is used for changelog and release note generation.
-title_regex = Regexp.new(/^\[?(fix|improvement|addition)\]?:/i)
-if github.pr_title.match(/^\[?WIP\]?\:/)
+title_regex = Regexp.new(/^(fix|improve|add)/i)
+if github.pr_title.match(/^\[?WIP\]?\:/i)
   failure("PR is still a WIP, do not merge") 
 elsif not github.pr_title.match(title_regex)
-  failure("PR title must start with `Fix:`, `Improvement:`, or `Addition:` in order to be merged")
+  failure("PR title must start with `fix`, `improve`, or `add` in order to be merged. Not case sensitive.")
 else
   pr_type = github.pr_title[title_regex,1]
-  message("PR title is proper, PR is of type `#{pr_type}`")
+  type_to_readable = { add: "Addition", fix: "Fix", improve: "Improvement" }
+  display_type = type_to_readable[pr_type.downcase.to_sym]
+  message("PR title is proper, PR is of type `#{display_type}`")
 end
 
 ## Checks that any TODOs on added lines have a link to a github issue
 issue_regexp = Regexp.new(/https?:\/\/(?:www\.)?github\.com\/Mudlet\/Mudlet\/issues\/(\d+)/i)
 sourcefile_regexp = Regexp.new(/.*\.(cpp|c|h|lua)$/)
 sourcefiles = (git.modified_files + git.added_files).uniq.select { |file| file.match(sourcefile_regexp) }
-bad_todos = false
-added_todos = 0
+bad_todos = []
+added_todos = {}
 sourcefiles.each do |filename|
   additions = git.diff_for_file(filename).patch.lines.grep(/^\+/)
   additions.each do |line|
-    next unless line.include?("TODO")
-    added_todos += 1
-    unless line.match(issue_regexp)
-      failure("TODO included in additions to file `#{filename}` without an issue link")
-      bad_todos = true
+    if line.include?("TODO")
+      has_issue = line.match(issue_regexp)
+      if has_issue
+        added_todos[filename] ||= []
+        added_todos[filename] << has_issue[1]
+      else
+        bad_todos << filename
+      end
     end
   end
 end
-message("TODO check successful, #{added_todos} added TODO(s) include(s) a linked issue") unless bad_todos || added_todos < 1
+bad_todos.uniq!
+total_todos = bad_todos.count + added_todos.count
+if total_todos > 0
+  todo_msg = "#{total_todos} file(s) with new TODO(s).\n"
+  if bad_todos.size > 0
+    todo_msg += "There is at least one TODO added without an issue link:\n"
+    todo_msg += """
+    <details>
+      <summary>
+        Click to expand file list
+      </summary>
+      <p>
+      #{bad_todos.join("\n")}
+      </p>
+    </details>
+    """
+  end
+  added_todos.each do |filename, issues|
+    todo_msg += "#{filename} adds issue(s): #{issues.join(' ')}\n"
+  end
+  markdown(todo_msg)
+end
