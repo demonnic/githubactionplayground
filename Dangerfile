@@ -13,5 +13,5 @@ end
 
 ## Checks that any TODOs on changed lines have a link to a github issue
 git.diff.each do |chunk|
-  message chunk.patch
+  message chunk.patch.lines
 end
