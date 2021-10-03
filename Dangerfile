@@ -19,6 +19,6 @@ sourcefiles.each do |filename|
   additions = git.diff_for_file(filename).patch.lines.grep(/^\+/)
   additions.each do |line|
     next unless line.include?("TODO")
-    failure("TODO included in additions to file #{filename} without an issue link") unless line.match(issue_regexp)
+    failure("TODO included in additions to file `#{filename}` without an issue link") unless line.match(issue_regexp)
   end
 end
