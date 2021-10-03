@@ -12,6 +12,6 @@ else
 end
 
 ## Checks that any TODOs on changed lines have a link to a github issue
-source_regex = Regexp.new(/src\/.*\.(cpp|h|lua)/i)
-active_source_files = (git.modified_files + git.added_files).uniq.select { |file| file.match(source_regex) }
-message(active_source_files.join(" "))
+git.diff.each do |chunk|
+  message chunk.patch
+end
