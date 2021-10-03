@@ -14,15 +14,11 @@ end
 ## Checks that any TODOs on changed lines have a link to a github issue
 issue_regexp = Regexp.new(/https?:\/\/(?:www\.)?github\.com\/Mudlet\/Mudlet\/issues\/(\d+)/)
 sourcefile_regexp = Regexp.new(/.*\.(cpp|c|h|lua)$/)
-git.diff.each do |chunk|
-  next unless chunk.path.match(sourcefile_regexp)
-  message("Source file #{chunk.path}")
-  additions = chunk.patch.lines.grep(/^\+/)
-  message(chunk.patch)
+sourcefiles = (git.modified_files + git.added_files).uniq.select { |file| file.match(sourcefile_regexp) }
+sourcefiles.each do |filename|
+  additions = git.diff_for_file(filename).patch.lines.grep(/^\+/)
   additions.each do |line|
-    if line.include?("TODO") then
-      issue_match = line.match(issue_regexp)
-      failure("TODO added in #{chunk.path} without a linked github issue") unless issue_match
-    end
+    next unless line.include?("TODO")
+    failure("TODO included in additions to file #{filename} without an issue link") unless line.match(issue_regexp)
   end
 end
