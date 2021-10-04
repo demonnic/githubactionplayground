@@ -18,10 +18,10 @@ else
   pr_type = github.pr_title[title_regex,1]
   type_to_readable = { add: "Addition", fix: "Fix", improve: "Improvement" }
   display_type = type_to_readable[pr_type.downcase.to_sym]
-  message("PR title is proper, PR is of type `#{display_type}`")
+  message("PR title is proper (type: `#{display_type}`)")
 end
 
-## Gathers and displays TODOs, failing them if a source file contains a TODO with no githug issue
+## Gathers and displays TODOs, failing them if a source file contains a TODO with no github issue
 bad_todos = []
 added_todos = {}
 sourcefiles.each do |filename|
