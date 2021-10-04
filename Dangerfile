@@ -37,13 +37,13 @@ bad_todos.uniq!
 total_todos = bad_todos.count + added_todos.count
 if total_todos > 0
   todo_msg = "#{total_todos} file(s) with new TODO(s).\n"
-  if bad_todos.size > 0
-    todo_msg += "There is at least one TODO added without an issue link:\n"
-    todo_msg += "  " + bad_todos.join("\n  ")
-  end
   added_todos.each do |filename, issues|
     issue_links = issues.map {|issue| "[#{issue}](https://github.com/Mudlet/Mudlet/issues/#{issue})" }
     todo_msg += "#{filename} adds issue(s): #{issue_links.join(', ')}\n"
+  end
+  if bad_todos.size > 0
+    todo_msg += "#{bad_todos.size} file(s) with 1+ TODOs added without an issue link:\n"
+    todo_msg += "* " + bad_todos.join("\n* ")
   end
   markdown(todo_msg)
 end
