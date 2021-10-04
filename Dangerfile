@@ -42,7 +42,8 @@ if total_todos > 0
     todo_msg += "#{filename} adds issue(s): #{issue_links.join(', ')}\n"
   end
   if bad_todos.size > 0
-    todo_msg += "## #{bad_todos.size} file(s) with 1+ TODOs added without an issue link:\n"
+    todo_msg += "## Bad TODOs\n\n"
+    todo_msg += "There are #{bad_todos.size} files with bad TODOs in them.\n\n"
     todo_msg += "* " + bad_todos.join("\n* ")
   end
   markdown(todo_msg)
