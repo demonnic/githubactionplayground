@@ -42,14 +42,13 @@ bad_todos.uniq!
 total_todos = bad_todos.count + added_todos.count
 if total_todos > 0
   todo_msg = "## #{total_todos} file(s) with new TODO(s).\n\n"
-  todo_msg += "## #{added_todos.count} TODOs with links\n\n" if added_todos.count > 0
+  todo_msg += "## #{added_todos.count} files with links\n\n" if added_todos.count > 0
   added_todos.each do |filename, issues|
     issue_links = issues.map {|issue| "[#{issue}](https://github.com/#{PROJ}/#{REPO}/issues/#{issue})" }
     todo_msg += "#{filename} adds issue(s): #{issue_links.join(', ')}\n"
   end
   if bad_todos.size > 0
-    todo_msg += "## Bad TODOs\n\n"
-    todo_msg += "There are #{bad_todos.size} files with bad TODOs in them.\n\n"
+    todo_msg += "## #{bad_todos.size} files with bad TODOs added\n\n"
     todo_msg += "* " + bad_todos.join("\n* ")
   end
   markdown(todo_msg)
