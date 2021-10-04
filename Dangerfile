@@ -39,16 +39,7 @@ if total_todos > 0
   todo_msg = "#{total_todos} file(s) with new TODO(s).\n"
   if bad_todos.size > 0
     todo_msg += "There is at least one TODO added without an issue link:\n"
-    todo_msg += """
-    <details>
-      <summary>
-        Click to expand file list
-      </summary>
-      <p>
-      #{bad_todos.join("\n")}
-      </p>
-    </details>
-    """
+    todo_msg += "  " + bad_todos.join("\n  ")
   end
   added_todos.each do |filename, issues|
     issue_links = issues.map {|issue| "[#{issue}](https://github.com/Mudlet/Mudlet/issues/#{issue})" }
@@ -56,3 +47,4 @@ if total_todos > 0
   end
   markdown(todo_msg)
 end
+failure("TODO added without an issue link, see below for list of files.") if bad_todos.count > 0
