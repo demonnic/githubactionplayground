@@ -51,7 +51,8 @@ if total_todos > 0
     """
   end
   added_todos.each do |filename, issues|
-    todo_msg += "#{filename} adds issue(s): #{issues.join(' ')}\n"
+    issue_links = issues.map {|issue| "[#{issue}](https://github.com/Mudlet/Mudlet/issues/#{issue})" }
+    todo_msg += "#{filename} adds issue(s): #{issue_links.join(', ')}\n"
   end
   markdown(todo_msg)
 end
