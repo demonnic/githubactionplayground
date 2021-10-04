@@ -1,4 +1,12 @@
 # Automates some of the checks for PRs
+# Declarations and collections which are used in future checks and may be reused in future.
+PROJ = "Mudlet"
+REPO = "Mudlet"
+issue_regexp = Regexp.new(/https?:\/\/(?:www\.)?github\.com\/#{PROJ}\/#{REPO}\/issues\/(\d+)/i)
+issue_url = "https://github.com/#{PROJ}/#{REPO}/issues/"
+sourcefile_regexp = Regexp.new(/.*\.(cpp|c|h|lua)$/)
+sourcefiles = (git.modified_files + git.added_files).uniq.select { |file| file.match(sourcefile_regexp) }
+
 
 ## Checks title formatting. This formatting is used for changelog and release note generation.
 title_regex = Regexp.new(/^(fix|improve|add)/i)
@@ -13,10 +21,7 @@ else
   message("PR title is proper, PR is of type `#{display_type}`")
 end
 
-## Checks that any TODOs on added lines have a link to a github issue
-issue_regexp = Regexp.new(/https?:\/\/(?:www\.)?github\.com\/Mudlet\/Mudlet\/issues\/(\d+)/i)
-sourcefile_regexp = Regexp.new(/.*\.(cpp|c|h|lua)$/)
-sourcefiles = (git.modified_files + git.added_files).uniq.select { |file| file.match(sourcefile_regexp) }
+## Gathers and displays TODOs, failing them if a source file contains a TODO with no githug issue
 bad_todos = []
 added_todos = {}
 sourcefiles.each do |filename|
@@ -36,9 +41,10 @@ end
 bad_todos.uniq!
 total_todos = bad_todos.count + added_todos.count
 if total_todos > 0
-  todo_msg = "## #{total_todos} file(s) with new TODO(s).\n"
+  todo_msg = "## #{total_todos} file(s) with new TODO(s).\n\n"
+  todo_msg += "## #{added_todos.count} TODOs with links\n\n" if added_todos.count > 0
   added_todos.each do |filename, issues|
-    issue_links = issues.map {|issue| "[#{issue}](https://github.com/Mudlet/Mudlet/issues/#{issue})" }
+    issue_links = issues.map {|issue| "[#{issue}](https://github.com/#{PROJ}/#{REPO}/issues/#{issue})" }
     todo_msg += "#{filename} adds issue(s): #{issue_links.join(', ')}\n"
   end
   if bad_todos.size > 0
